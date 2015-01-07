@@ -29,15 +29,15 @@ namespace addon {
         CAST_OP(std::string)
         #undef CAST_OP
         
-        void operator=(const char t[]) { // handle spaecial case since "bla" is not a string
+        void operator = (const char t[]) { // handle spaecial case since bla" is not a string
             val = std::string(t);
         }
         template<typename T>
-        typename std::enable_if<!std::is_same<T, proxy_struct>::value>::type operator=(T const & t){
+        typename std::enable_if<!std::is_same<T, proxy_struct>::value>::type operator = (T const & t){
             val = t;
         }
         template<typename T>
-        typename std::enable_if< std::is_same<T, proxy_struct>::value>::type operator=(T const & t){
+        typename std::enable_if< std::is_same<T, proxy_struct>::value>::type operator = (T const & t){
             val = t.val;
         }
         
@@ -56,7 +56,7 @@ namespace addon {
                                     NAME##_helper(proxy_struct a, T b) {\
         std::stringstream ss;                                           \
         ss << "type " << typeid(T).name() << "(" << b                   \
-           << ") is not convertible to " << typeid(X).name();           \
+ << ") is not convertible to " << typeid(X).name();           \
         ERROR(ss.str());                                                \
         return X();                                                     \
     }                                                                   \
@@ -78,15 +78,15 @@ namespace addon {
         return a OP b;                                  \
     }                                                   // 
     
-    OP_SUPPORT(add, +)
-    OP_SUPPORT(mult, *)
+    OP_SUPPORT(add, + )
+    OP_SUPPORT(mult, * )
     
     #undef OP_SUPPORT
     
-    std::ostream & operator<<(std::ostream & os, proxy_struct const & arg) {
+    std::ostream & operator << (std::ostream & os, proxy_struct const & arg) {
         #define CAST_BACK(X) if(arg.val.type() == typeid(X)) {      \
                                  os << boost::any_cast<X>(arg.val); \
-                             } else                                 //
+                             } else                                 // 
         
         CAST_BACK(int)
         CAST_BACK(double)
@@ -116,14 +116,14 @@ namespace addon {
             if(boost::any_cast<int>(map_["warn_"]))
                 WARNING(text);
         }
-        void read(int argc, char* argv[]) {
+        void read(int argc, char * argv[]) {
             //======================= get program dir ==============================================
             std::string dir(argv[0]);
             auto pos = dir.rfind("/");
             dir.erase(pos + 1, dir.size() - pos - 1); // erase progname in ./folder/progname
             dir.erase(0, 1); // erase . in ./folder
             
-            char* path=getcwd(NULL, 0);
+            char * path = getcwd(NULL, 0);
             std::string cwd = path;
             (*this)["prog_dir"] = cwd + dir;
             
@@ -176,7 +176,7 @@ namespace addon {
                 // checking if = sign
                 if(w.find("=") != std::string::npos) {
                     std::string key = w.substr(0, w.find("="));
-                    std::string val = w.substr(w.find("=")+1, w.size());
+                    std::string val = w.substr(w.find("=") + 1, w.size());
                     if(has_param(key)) {
                         std::stringstream ss;
                         ss << "parameter " << key << " already set to " << (*this)[key] << " -> overwrite to " << val;
@@ -188,8 +188,8 @@ namespace addon {
                 }
                 if(w[0] == '-' and w.size() > 1) {
                     std::string key = w.substr(1, w.size());
-                    if(i + 1 < v.size() and v[i+1][0] != '-' and v[i+1].find("=") == std::string::npos) { // param
-                        std::string val = v[i+1];
+                    if(i + 1 < v.size() and v[i + 1][0] != '-' and v[i + 1].find("=") == std::string::npos) { // param
+                        std::string val = v[i + 1];
                         //-------------- just checking for false input -----------------------------
                         if(has_param(key)) {
                             std::stringstream ss;
@@ -296,7 +296,7 @@ namespace addon {
         std::vector<std::string> flag_;
     } parameter;
 
-    std::ostream & operator<<(std::ostream & os, parameter_class const & arg) {
+    std::ostream & operator << (std::ostream & os, parameter_class const & arg) {
         arg.print(os);
         return os;
     }
