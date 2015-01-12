@@ -55,6 +55,12 @@ namespace addon {
         T operator()() {
             return distr_(rng_);
         }
+        uint64_t const & seed() const {
+            return rng_.seed();
+        }
+        void seed(uint64_t const & seed) {
+            rng_.seed(seed);
+        }
     private:
         template<typename U, bool b>
         struct distr_chooser {

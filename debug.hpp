@@ -8,8 +8,8 @@
 #include "color.hpp"
 
 #ifndef ADDON_NO_DEBUG
-    #define DEBUG_VAR(X) std::cout << RED_ << "  DEBUG_VAR: " << REDB_ << #X << " = " << X << NONE_ << std::endl;
-    #define DEBUG_MSG(X) std::cout << RED_ << "  DEBUG_MSG: " << REDB_                << X << NONE_ << std::endl;
+    #define DEBUG_VAR(X) std::cout << RED_ << "  DEBUG_VAR: " << REDB_ << #X << RED_ << " = " << X << NONE_ << std::endl;
+    #define DEBUG_MSG(X) std::cout << RED_ << "  DEBUG_MSG: " << REDB_                        << X << NONE_ << std::endl;
 #else
     #define DEBUG_VAR(X) ;
     #define DEBUG_MSG(X) ;

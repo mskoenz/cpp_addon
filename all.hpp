@@ -5,9 +5,12 @@
 #ifndef ADDON_ALL_HEADER
 #define ADDON_ALL_HEADER
 
+#include "log.hpp"
 #include "color.hpp"
 #include "debug.hpp"
 #include "random.hpp"
 #include "parameter.hpp"
+#include "accumulator.hpp"
+#include "micro_benchmark.hpp"
 
 #endif // ADDON_ALL_HEADER

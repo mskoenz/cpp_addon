@@ -29,15 +29,15 @@ namespace addon {
         CAST_OP(std::string)
         #undef CAST_OP
         
-        void operator = (const char t[]) { // handle spaecial case since bla" is not a string
+        void operator=(const char t[]) { // handle spaecial case since bla is not a string
             val = std::string(t);
         }
         template<typename T>
-        typename std::enable_if<!std::is_same<T, proxy_struct>::value>::type operator = (T const & t){
+        typename std::enable_if<!std::is_same<T, proxy_struct>::value>::type operator=(T const & t){
             val = t;
         }
         template<typename T>
-        typename std::enable_if< std::is_same<T, proxy_struct>::value>::type operator = (T const & t){
+        typename std::enable_if< std::is_same<T, proxy_struct>::value>::type operator=(T const & t){
             val = t.val;
         }
         
@@ -56,7 +56,7 @@ namespace addon {
                                     NAME##_helper(proxy_struct a, T b) {\
         std::stringstream ss;                                           \
         ss << "type " << typeid(T).name() << "(" << b                   \
- << ") is not convertible to " << typeid(X).name();           \
+           << ") is not convertible to " << typeid(X).name();           \
         ERROR(ss.str());                                                \
         return X();                                                     \
     }                                                                   \
@@ -83,7 +83,7 @@ namespace addon {
     
     #undef OP_SUPPORT
     
-    std::ostream & operator << (std::ostream & os, proxy_struct const & arg) {
+    std::ostream & operator<<(std::ostream & os, proxy_struct const & arg) {
         #define CAST_BACK(X) if(arg.val.type() == typeid(X)) {      \
                                  os << boost::any_cast<X>(arg.val); \
                              } else                                 // 
@@ -102,6 +102,7 @@ namespace addon {
     //  |                       parameter class                                                    |
     //  +------------------------------------------------------------------------------------------+
     class parameter_class {
+        using map_type = std::map<std::string, boost::any>;
     public:
         parameter_class() {
             map_["warn_"] = 1;
@@ -271,7 +272,7 @@ namespace addon {
             size_t ipos = 0;
             int ival = 0;
             try {
-                ival = std::stoi(val, &ipos);
+                ival = std::stoi(val, & ipos);
             } catch(...) {
                 ipos = 0;
             }
@@ -279,7 +280,7 @@ namespace addon {
             size_t dpos = 0;
             double dval = 0;
             try {
-                dval = std::stod(val, &dpos);
+                dval = std::stod(val, & dpos);
             } catch(...) {
                 dpos = 0;
             }
@@ -291,12 +292,12 @@ namespace addon {
             else
                 add(key, val);
         }
-        std::map<std::string, boost::any> map_;
+        map_type map_;
         std::vector<std::string> arg_;
         std::vector<std::string> flag_;
     } parameter;
 
-    std::ostream & operator << (std::ostream & os, parameter_class const & arg) {
+    std::ostream & operator<<(std::ostream & os, parameter_class const & arg) {
         arg.print(os);
         return os;
     }

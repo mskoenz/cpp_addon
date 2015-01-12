@@ -6,6 +6,7 @@
 #define ADDON_HELPER_HEADER
 
 #include "color.hpp"
+#include "debug.hpp"
 
 #include <stdexcept>
 #include <assert.h>
@@ -21,7 +22,6 @@ void ERROR(std::string const & text) {
 void WARNING(std::string const & text) {
     std::cout << YELLOWB_ << "warning: " << YELLOW_ << text << NONE_ << std::endl;
 }
-
 
 void ASSERT(bool const & cond, std::string const & text = "") {
     #ifndef NDEBUG
