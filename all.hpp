@@ -8,9 +8,13 @@
 #include "log.hpp"
 #include "color.hpp"
 #include "debug.hpp"
+#include "timer.hpp"
 #include "random.hpp"
 #include "parameter.hpp"
 #include "accumulator.hpp"
+#include "performance.hpp"
 #include "micro_benchmark.hpp"
+
+#include "clock.hpp"
 
 #endif // ADDON_ALL_HEADER

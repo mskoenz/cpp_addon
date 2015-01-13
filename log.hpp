@@ -7,10 +7,9 @@
 
 #include "color.hpp"
 #include "parameter.hpp"
+#include "clock.hpp"
 
 #include <map>
-#include <ctime>
-#include <chrono>
 #include <fstream>
 #include <iomanip>
 
@@ -41,13 +40,8 @@ namespace addon {
             }
             ofs << std::endl;
             //----------------------- write timestamp ----------------------------------------------
-            auto t = std::chrono::system_clock::now();
-            std::time_t tt = std::chrono::system_clock::to_time_t(t);
-            char buffer[80];
-            struct tm * timeinfo = localtime(&tt);
-            strftime(buffer, 80, "%d.%m.%y---%H:%M", timeinfo);
-            
-            ofs << "#" << std::setfill('-') << std::setw(99) << buffer << std::setfill(' ') << std::endl;
+            ofs << "#" << std::setfill('-') << std::setw(99) << clock::date_time() 
+                << std::setfill(' ') << std::endl;
             ofs.close();
         }
     private:

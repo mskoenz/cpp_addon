@@ -16,17 +16,14 @@
 #include <utility>
 
 namespace addon {
-    addon::performance_class clock2; // use another clock in order not to create conflicts with addon::clock
-    class mb_timer_class {
+    addon::timer_class timer2;
+    class mb {
     public:
-        mb_timer_class() {
-            
-        }
-        void start(std::string const & key) {
-            double cyc = addon::clock2.cycles(false);
-            addon::clock2.start();
-            addon::clock2.stop();
-            cyc -= addon::clock2.cycles(false);
+        static void start(std::string const & key) {
+            double cyc = addon::timer2.cycles(false);
+            addon::timer2.start();
+            addon::timer2.stop();
+            cyc -= addon::timer2.cycles(false);
             
             for(auto const & k : stack_) {
                 std::get<0>(tel_.at(k)) += cyc;
@@ -34,7 +31,7 @@ namespace addon {
             tel_[key];
             if(std::get<2>(tel_.at(key)) == "") {
                 if(stack_.size() == 0) {
-                    std::get<2>(tel_.at(key)) = "super_secret_root_name";
+                    std::get<2>(tel_.at(key)) = "root";
                 }
                 else
                     std::get<2>(tel_.at(key)) = stack_.back();
@@ -42,11 +39,11 @@ namespace addon {
                 
             stack_.push_back(key);
         }
-        void stop() {
-            double cyc = addon::clock2.cycles(false);
-            addon::clock2.start();
-            addon::clock2.stop();
-            cyc -= addon::clock2.cycles(false);
+        static void stop() {
+            double cyc = addon::timer2.cycles(false);
+            addon::timer2.start();
+            addon::timer2.stop();
+            cyc -= addon::timer2.cycles(false);
             
             std::string key = stack_.back();
             for(auto const & k : stack_)
@@ -56,7 +53,7 @@ namespace addon {
             std::get<0>(tel_.at(key)) = 0;
             stack_.pop_back();
         }
-        void print() {
+        static void results() {
             std::set<std::string> parents;
             
             std::cout << GREENB_ << "Microbenchmarks:" << NONE_ << std::endl;
@@ -67,7 +64,7 @@ namespace addon {
             
             for(auto const & p : parents) {
                 double time = 0;
-                if(p == "super_secret_root_name") {
+                if(p == "root") {
                     std::cout << GREENB_ << "Performance for all:" << NONE_ << std::endl;
                     for(auto const & t : tel_) {
                     if(std::get<2>(t.second) == p)
@@ -81,20 +78,20 @@ namespace addon {
                      
                 for(auto const & t : tel_) {
                     if(std::get<2>(t.second) == p)
-                        std::cout << YELLOW_ << std::setw(12) << t.first << NONE_ << " uses " << YELLOWB_ <<int((std::get<1>(tel_.at(t.first)).mean() * std::get<1>(tel_.at(t.first)).count() / time) * 100) << "%" << NONE_ << std::endl;
+                        std::cout << YELLOW_ << std::setw(12) << t.first << NONE_ << " uses " << YELLOWB_ << int((std::get<1>(tel_.at(t.first)).mean() * std::get<1>(tel_.at(t.first)).count() / time) * 100) << "%" << NONE_ << std::endl;
                 }
             }
             
         }
-        void clear() {
+        static void clear() {
             tel_.clear();
             stack_.clear();
         }
-        std::map<std::string, std::pair<int, double>> get(std::string const & p) const {
-            std::map<std::string, std::pair<int, double>> res;
+        static std::map<std::string, std::pair<double, double >> get(std::string const & p) {
+            std::map<std::string, std::pair<double, double >> res;
             
             double time = 0;
-            if(p == "super_secret_root_name") {
+            if(p == "root") {
                 for(auto const & t : tel_) {
                 if(std::get<2>(t.second) == p)
                     time += std::get<1>(t.second).mean() * std::get<1>(t.second).count();
@@ -111,39 +108,33 @@ namespace addon {
             return res;
         }
     private:
-        std::map<std::string, std::tuple<double, accumulator<int64_t>, std::string>> tel_;
-        std::vector<std::string> stack_;
-    } mb_timer;
-}//end namespace addon
+        static std::map<std::string, std::tuple<double, accumulator<int64_t>, std::string >> tel_;
+        static std::vector<std::string> stack_;
+    };
+    std::map<std::string, std::tuple<double, accumulator<int64_t>, std::string >> mb::tel_;
+    std::vector<std::string> mb::stack_;
+}// end namespace addon
 
 #ifdef ENABLE_MICRO
     #define START_MICRO(name)           \
-    addon::clock2.stop();               \
-    addon::mb_timer.start(name);        \
-    addon::clock2.start();              //
+    addon::timer2.stop();               \
+    addon::mb::start(name);             \
+    addon::timer2.start();              // 
 
     #define STOP_MICRO()                \
-    addon::clock2.stop();               \
-    addon::mb_timer.stop();             \
-    addon::clock2.start();              //
+    addon::timer2.stop();               \
+    addon::mb::stop();                  \
+    addon::timer2.start();              // 
 
     #define NEXT_MICRO(name)            \
     STOP_MICRO()                        \
-    addon::clock2.stop();               \
-    addon::mb_timer.start(name);        \
-    addon::clock2.start();              //
+    addon::timer2.stop();               \
+    addon::mb::start(name);             \
+    addon::timer2.start();              // 
 #else
     #define START_MICRO(name) ;
     #define STOP_MICRO() ;
     #define NEXT_MICRO(name) ;
 #endif
 
-#define P_MICRO()                   \
-addon::mb_timer.print();            //
-
-#define CLEAR_MICRO()               \
-addon::mb_timer.clear();            //
-
-#define RES_MICRO(parent) addon::mb_timer.get(parent)//
-
-#endif //ADDON_MICRO_BENCHMARK_HEADER
+#endif // ADDON_MICRO_BENCHMARK_HEADER

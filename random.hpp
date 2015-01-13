@@ -30,7 +30,6 @@ namespace addon {
         }
         uint64_t operator()() {
             ctr_ += distr_(rng_);
-            std::cout << ctr_ << std::endl;
             return base_seed_ + ctr_;
         }
         uint64_t const & seed() const {

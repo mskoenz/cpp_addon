@@ -51,7 +51,7 @@ namespace addon {
 
     template<typename T>
     std::ostream & operator<<(std::ostream & os, accumulator<T> const & d) {
-        os << d.mean() << " +/- " << std::setprecision(3) << (100*d.std()/d.mean()) << "% (n = " << d.count() << ")";
+        os << d.mean() << " +/- " << std::setprecision(3) << (100 * d.std() / d.mean()) << "% (n = " << d.count() << ")";
         return os;
     }
 }// end namespace addon
