@@ -76,6 +76,15 @@ namespace addon {
         double usec() const {
             return (end_time_ - start_time_);
         }
+        double elapsed_sec() const {
+            return (clock::usec() - start_time_) / 1000000.;
+        }
+        double elapsed_msec() const {
+            return (clock::usec() - start_time_) / 1000.;
+        }
+        double elapsed_usec() const {
+            return (clock::usec() - start_time_);
+        }
         double const & min_cycles() const {
             return min_cycles_;
         }

@@ -20,16 +20,21 @@ namespace addon {
     //  |                        proxy struct                                                      |
     //  +------------------------------------------------------------------------------------------+
     struct proxy_struct {
-        proxy_struct(boost::any & val): val(val) {
+        proxy_struct() {
         }
-        
+        template<typename T>
+        proxy_struct(T t): val(t) {
+        }
         #define CAST_OP(X) operator X() {return boost::any_cast<X>(val);}
         CAST_OP(int)
         CAST_OP(double)
         CAST_OP(std::string)
         #undef CAST_OP
         
-        void operator=(const char t[]) { // handle spaecial case since bla is not a string
+        std::type_info const & type() const {
+            return val.type();
+        }
+        void operator=(const char t[]) { // handle spaecial case since "bla" is not a string
             val = std::string(t);
         }
         template<typename T>
@@ -41,42 +46,63 @@ namespace addon {
             val = t.val;
         }
         
-        boost::any & val;
+        boost::any val;
     };
     
     //============================ addition ========================================================
-    #define OP_SUPPORT(NAME, OP)                                        \
-    template<typename T, typename X>                                    \
-    typename std::enable_if< std::is_convertible<T, X>::value, X>::type \
-                                    NAME##_helper(proxy_struct a, T b) {\
-        return X(a) OP X(b);                                            \
-    }                                                                   \
-    template<typename T, typename X>                                    \
-    typename std::enable_if<!std::is_convertible<T, X>::value, X>::type \
-                                    NAME##_helper(proxy_struct a, T b) {\
-        std::stringstream ss;                                           \
-        ss << "type " << typeid(T).name() << "(" << b                   \
-           << ") is not convertible to " << typeid(X).name();           \
-        ERROR(ss.str());                                                \
-        return X();                                                     \
-    }                                                                   \
+    //~ if(a.type() == typeid(std::string))             \
+            //~ res = std::string(a) + (std::string*)void*(b);\
+        //~ else if(a.type() == typeid(double))             \
+            //~ res = double(a) OP (std::string*)void*(b);\
+        //~ else if(a.type() == typeid(int))                \
+            //~ res = int(a) OP (std::string*)void*(b);   \
+    
+    #define OP_SUPPORT(NAME, OP)                        \
+    template<typename T, bool, bool, bool>              \
+    struct NAME##_helper {                              \
+        static proxy_struct exec(proxy_struct a, T b) { \
+            return a;                                   \
+        }                                               \
+    };                                                  \
     template<typename T>                                \
-    boost::any operator OP (proxy_struct a, T b) {      \
-        if(a.val.type() == typeid(std::string))         \
-            return NAME##_helper<T, std::string>(a, b); \
-        else if(a.val.type() == typeid(int))            \
-            return NAME##_helper<T, int>(a, b);         \
-        else if(a.val.type() == typeid(double))         \
-            return NAME##_helper<T, double>(a, b);      \
-        else                                            \
-            ERROR("not supported type in proxy_struct");\
+    struct NAME##_helper<T, true, false, false> {       \
+        static proxy_struct exec(proxy_struct a, T b) { \
+            return std::string(a) + std::string(b);     \
+        }                                               \
+    };                                                  \
+    template<typename T>                                \
+    struct NAME##_helper<T, false, true, false> {       \
+        static proxy_struct exec(proxy_struct a, T b) { \
+            if(a.type() == typeid(int))                 \
+                return proxy_struct(int(a) OP double(b));\
+            if(a.type() == typeid(double))              \
+                return proxy_struct(double(a) OP double(b));\
+        }                                               \
+    };                                                  \
+    template<typename T>                                \
+    struct NAME##_helper<T, false, false, true> {       \
+        static proxy_struct exec(proxy_struct a, T b) { \
+            if(a.type() == typeid(int))                 \
+                return proxy_struct(int(a) OP int(b));  \
+            if(a.type() == typeid(double))              \
+                return proxy_struct(double(a) OP double(b));\
+        }                                               \
+    };                                                  \
                                                         \
-        return 0;                                       \
+    template<typename T>                                \
+    proxy_struct operator OP (proxy_struct a, T b) {    \
+        proxy_struct res;                               \
+        res = NAME##_helper<T, std::is_convertible<T, std::string>::value   \
+                             , std::is_floating_point<T>::value             \
+                             , std::is_integral<T>::value                   \
+                           >::exec(a, b);               \
+                                                        \
+        return res;                                     \
     }                                                   \
     template<typename T>                                \
-    boost::any operator OP(T b, proxy_struct a) {       \
+    proxy_struct operator OP(T b, proxy_struct a) {     \
         return a OP b;                                  \
-    }                                                   // 
+    }                                                   //
     
     OP_SUPPORT(add, + )
     OP_SUPPORT(mult, * )
@@ -84,7 +110,7 @@ namespace addon {
     #undef OP_SUPPORT
     
     std::ostream & operator<<(std::ostream & os, proxy_struct const & arg) {
-        #define CAST_BACK(X) if(arg.val.type() == typeid(X)) {      \
+        #define CAST_BACK(X) if(arg.type() == typeid(X)) {      \
                                  os << boost::any_cast<X>(arg.val); \
                              } else                                 // 
         
@@ -102,37 +128,28 @@ namespace addon {
     //  |                       parameter class                                                    |
     //  +------------------------------------------------------------------------------------------+
     class parameter_class {
-        using map_type = std::map<std::string, boost::any>;
+        using map_type = std::map<std::string, proxy_struct>;
     public:
         parameter_class() {
             map_["warn_"] = 1;
         }
-        void add(std::string const & name, boost::any const & val) {
-            map_[name] = val;
-        }
-        proxy_struct operator[](std::string const & name) {
-            return proxy_struct(map_[name]);
+        proxy_struct & operator[](std::string const & name) {
+            return map_[name];
         }
         void warn(std::string const & text) {
-            if(boost::any_cast<int>(map_["warn_"]))
+            if(int(map_["warn_"]))
                 WARNING(text);
         }
         void read(int argc, char * argv[]) {
             //======================= get program dir ==============================================
-            std::string dir(argv[0]);
-            auto pos = dir.rfind("/");
-            dir.erase(pos + 1, dir.size() - pos - 1); // erase progname in ./folder/progname
-            dir.erase(0, 1); // erase . in ./folder
-            
-            char * path = getcwd(NULL, 0);
-            std::string cwd = path;
-            (*this)["prog_dir"] = cwd + dir;
+            std::string path_dir = abspath(argv);
+            (*this)["prog_dir"] = path_dir;
             
             //===================== format incoming argv ===========================================
             std::stringstream ss;
             //--------------- in case there is a bash_in.txt, read it ------------------------------
             std::ifstream ifs;
-            ifs.open(cwd + dir + "bash_in.txt");
+            ifs.open(path_dir + "/bash_in.txt");
             
             if(ifs.is_open()) {
                 GREEN("bash_in.txt file found");
@@ -171,7 +188,7 @@ namespace addon {
             
             bool pas = false;
             
-            for(uint i = 1; i < v.size(); ++i) {
+            for(uint i = 0; i < v.size(); ++i) {
                 
                 auto & w = v[i];
                 // checking if = sign
@@ -254,14 +271,27 @@ namespace addon {
         template<typename S>
         void print(S & os) const {
             os << GREENB_ << "Parameter Class contains:" << NONE_ << std::endl;
-            for(auto v: map_) { // has to be copy...
-                os << v.first << " = " << proxy_struct(v.second) << std::endl;
-            }
-            os << "Flags: ";
+            //------------------- print int -------------------
+            os << GREEN_ << "integer:" << NONE_ << std::endl;
+            for(auto v: map_) // has to be copy...
+                if(v.second.type() == typeid(int))
+                    os << "    " << v.first << " = " << v.second << std::endl;
+            //------------------- print double -------------------
+            os << GREEN_ << "double:" << NONE_ << std::endl;
+            for(auto v: map_)
+                if(v.second.type() == typeid(double))
+                    os << "    " << v.first << " = " << v.second << std::endl;
+            //------------------- print string -------------------
+            os << GREEN_ << "string:" << NONE_ << std::endl;
+            for(auto v: map_)
+                if(v.second.type() == typeid(std::string))
+                    os << "    " << v.first << " = " << v.second << std::endl;
+            os << GREEN_ << "Flags: " << NONE_;
             for(auto const & f: flag_) {
                 os << "-" << f << " ";
             }
-            os << std::endl << "Args: ";
+            os << std::endl;
+            os << GREEN_ << "Args: " << NONE_;
             for(auto const & a: arg_) {
                 os << a << " ";
             }
@@ -286,11 +316,11 @@ namespace addon {
             }
             
             if(ipos == val.size())
-                add(key, ival);
+                map_[key] = ival;
             else if(dpos == val.size())
-                add(key, dval);
+                map_[key] = dval;
             else
-                add(key, val);
+                map_[key] = val;
         }
         map_type map_;
         std::vector<std::string> arg_;

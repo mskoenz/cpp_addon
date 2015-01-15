@@ -8,10 +8,57 @@
 #include "color.hpp"
 #include "debug.hpp"
 
-#include <stdexcept>
+#include <iomanip>
+#include <sstream>
 #include <assert.h>
 #include <iostream>
-#include <sstream>
+#include <stdexcept>
+
+#include <unistd.h>
+
+namespace addon {
+    std::string sec_to_time(uint64_t const & sec) {
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(2) << (sec)/3600
+                         << ":" << std::setw(2) << (sec/60)%60
+                         << ":" << std::setw(2) << (sec)%60;
+        return ss.str();
+    }
+
+    std::string abspath(char* argv[]) {
+        std::string dir(argv[0]);
+        auto pos = dir.rfind("/");
+        dir.erase(pos, dir.size() - pos); // erase progname in ./folder/progname
+        dir.erase(0, 1); // erase . in ./folder
+        
+        char * path = getcwd(NULL, 0);
+        std::string cwd = path;
+        
+        return path + dir;
+    }
+    
+    std::string progress_bar(double const & p) {
+        std::stringstream ss;
+        int const size = 50;
+        int bars = p * size;
+        
+        if(p < .33)
+            ss << RED_;
+        else if(p < .66)
+            ss << YELLOW_;
+        else if(p >= 1)
+            ss << CYAN_;
+        else
+            ss << GREEN_;
+        
+        ss << "<" << std::setfill('|') << std::setw(bars) << "" << std::setfill(' ') 
+                  << std::setw(size - bars) << "" << ">" << NONE_ 
+                  << std::setw(3) << int(p * 100) << "% " << std::endl;
+        
+        return ss.str();
+    }
+    
+}//end namespace addon
 
 void ERROR(std::string const & text) {
     std::stringstream ss;

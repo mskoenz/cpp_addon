@@ -38,8 +38,10 @@
 #define NONE_ "\033[0m" 
 
 //------------------------- special bash prompt ----------------------------------------------------
-#define CLRSCR "\033[2J\033[100A"
-#define RENTER "\033[1A"
+#define CLRSCR_ "\033[2J\033[100A"
+#define RENTER_ "\033[1A\x1B[2K"
+#define CLEAR_ "\x1B[2K"
+#define UP_ "\033[1A"
 
 #else // ADDON_NO_COLOR
 
@@ -72,8 +74,8 @@
 #define NONE_ ""
 
 //------------------------- special bash prompt ----------------------------------------------------
-#define CLRSCR ""
-#define RENTER ""
+#define CLRSCR_ ""
+#define RENTER_ ""
 
 #endif // ADDON_NO_COLOR
 

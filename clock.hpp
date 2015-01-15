@@ -75,7 +75,7 @@ namespace addon {
                 std::cout << GREEN_ << "Date/Time: " << GREENB_ << date_time("---") << NONE_ << std::endl;
                 std::cout << GREEN_ << "Runtime:   " << GREENB_ << time(false) << NONE_ << std::endl;
             }
-            
+        private:
             static chrono_clock::time_point start_time_;
         };
         chrono_clock::time_point detail_clock_class::start_time_ = chrono_clock::now();

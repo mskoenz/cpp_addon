@@ -6,8 +6,10 @@
 #define ADDON_LOG_HEADER
 
 #include "color.hpp"
-#include "parameter.hpp"
 #include "clock.hpp"
+#include "parameter.hpp" //for proxy struct
+
+#include <boost/any.hpp>
 
 #include <map>
 #include <fstream>
@@ -15,15 +17,12 @@
 
 namespace addon {
     class log_class {
-        using map_type = std::map<std::string, boost::any>;
+        using map_type = std::map<std::string, proxy_struct>;
     public:
-        log_class(std::string const & name): name_(name) {
+        log_class(std::string const & name = parameter["prog_dir"] + "/log.txt"): name_(name) {
         }
-        void add(std::string const & name, boost::any const & val) {
-            map_[name] = val;
-        }
-        proxy_struct operator[](std::string const & name) {
-            return proxy_struct(map_[name]);
+        proxy_struct & operator[](std::string const & name) {
+            return map_[name];
         }
         void print() {
             for(auto & a: map_) {
@@ -46,21 +45,33 @@ namespace addon {
         }
     private:
         void verify_header() {
-            std::ifstream ifs(name_.c_str(), std::ios_base::in);
-            
             std::stringstream ss;
             for(auto & a: map_) {
                 ss << a.first << " ";
             }
             std::string line_should_be = ss.str();
             
+            if(first_open_) {
+                first_open_ = false;
+                if(parameter.has_flag("log_kill")) {
+                    std::ofstream ofs(name_.c_str(), std::ios_base::trunc | std::ios_base::out);
+                    ofs << line_should_be << std::endl;
+                    ofs.close();
+                    return;
+                }
+            }
+            
+            std::ifstream ifs(name_.c_str(), std::ios_base::in);
             if(ifs.is_open()) { // file exists
                 
                 std::string line_read = "";
-                while(line_read == "" and !ifs.eof())
+                while((line_read == "" or line_read[0] == '#') and !ifs.eof()) {
                     std::getline(ifs, line_read);
+                    //~ if()
+                        //~ line_read = "";
+                }
                 ifs.close();
-
+                
                 if(line_read == line_should_be) { // all is ok, descriptor matches
                     return;
                 }
@@ -79,6 +90,7 @@ namespace addon {
         }
         std::string name_;
         map_type map_;
+        bool first_open_ = true;
     };
 }// end namespace addon
 
