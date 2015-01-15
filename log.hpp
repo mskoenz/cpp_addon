@@ -9,8 +9,6 @@
 #include "clock.hpp"
 #include "parameter.hpp" //for proxy struct
 
-#include <boost/any.hpp>
-
 #include <map>
 #include <fstream>
 #include <iomanip>

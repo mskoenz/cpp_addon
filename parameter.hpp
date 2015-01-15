@@ -6,8 +6,7 @@
 #define ADDON_PARAMETER_HEADER
 
 #include "helper.hpp"
-
-#include <boost/any.hpp>
+#include "boost_any.hpp"
 
 #include <map>
 #include <regex>
