@@ -16,18 +16,21 @@ namespace addon {
     class progress {
     public:
         static void set_load(uint64_t const & in) {
-            fname_ = std::string(parameter["prog_dir"] + "/status.txt"); //strange that I have to use cast here bc static...
+            fname_ = std::string(parameter["wd"] + "/status.txt"); //strange that I have to use cast here bc static...
             load_ = in;
             timer_.start();
             mod_ = 1;
             first_idx_ = -1;
             last_print_ = timer_.elapsed_sec();
+            
+            launch_time_ = clock::time_since_epoch();
         }
         static void write_state_file() {
             std::stringstream ss;
             ss << "p " << p() << std::endl
                << "eta " << eta_ << std::endl
-               << "eta_2 " << sec_to_time(eta_) << std::endl;
+               << "time " << timer_.elapsed_sec() << std::endl
+               << "launch " << launch_time_ << std::endl;
             std::ofstream ofs;
             ofs.open(fname_, std::ios_base::out);
             ofs << ss.str();
@@ -44,14 +47,8 @@ namespace addon {
                     idx_ = i;
                     eta_ = (1 - p()) / p() * ela;
                     
-                    if(p() < 1) {
-                        print();
-                        std::cout << RENTER_;
-                    }
-                    else {
-                        eta_ = timer_.sec();
-                        print();
-                    }
+                    print();
+                    
                     trigger_ = true;
                 }
                 else {
@@ -82,8 +79,12 @@ namespace addon {
         static void print() {
             if(to_file)
                 write_state_file();
-            if(to_term)
+            if(to_term) {
                 std::cout << "Job done in " << sec_to_time(eta_) << "  " << progress_bar(p());
+                if(p() < 1) {
+                    std::cout << RENTER_;
+                }
+            }
         }
         static bool to_file;
         static bool to_term;
@@ -94,6 +95,7 @@ namespace addon {
         //------------------- modulator -------------------
         static uint64_t mod_;
         static double last_print_;
+        static uint64_t launch_time_;
         static double first_idx_;
         static double idx_;
         
@@ -110,6 +112,7 @@ namespace addon {
     uint64_t progress::load_;
     uint64_t progress::mod_;
     double progress::last_print_;
+    uint64_t progress::launch_time_;
     double progress::first_idx_;
     double progress::idx_;
     double progress::eta_;

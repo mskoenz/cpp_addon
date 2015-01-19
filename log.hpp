@@ -17,7 +17,7 @@ namespace addon {
     class log_class {
         using map_type = std::map<std::string, proxy_struct>;
     public:
-        log_class(std::string const & name = parameter["prog_dir"] + "/log.txt"): name_(name) {
+        log_class(std::string const & name = parameter["wd"] + "/log.txt"): name_(name) {
         }
         proxy_struct & operator[](std::string const & name) {
             return map_[name];

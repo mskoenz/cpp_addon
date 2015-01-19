@@ -71,6 +71,11 @@ namespace addon {
             static void sleep(double const & sec) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(uint(1000 * sec)));
             }
+            static uint64_t time_since_epoch() {
+                using namespace std::chrono;
+                duration<uint64_t, std::ratio<1, 1 >> res = duration_cast<duration<uint64_t>> (chrono_clock::now().time_since_epoch());
+                return res.count();
+            }
             static void print() {
                 std::cout << GREEN_ << "Date/Time: " << GREENB_ << date_time("---") << NONE_ << std::endl;
                 std::cout << GREEN_ << "Runtime:   " << GREENB_ << time(false) << NONE_ << std::endl;
