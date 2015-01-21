@@ -32,8 +32,11 @@ namespace addon {
             verify_header();
             //------------------------ write data --------------------------------------------------
             std::ofstream ofs(name_.c_str(), std::ios_base::app);
+            int i = 0;
             for(auto & a: map_) {
-                ofs << a.second << " ";
+                ofs << a.second;
+                if(++i < map_.size())
+                    ofs << " ";
             }
             ofs << std::endl;
             //----------------------- write timestamp ----------------------------------------------
@@ -44,8 +47,11 @@ namespace addon {
     private:
         void verify_header() {
             std::stringstream ss;
+            int i = 0;
             for(auto & a: map_) {
-                ss << a.first << " ";
+                ss << a.first;
+                if(++i < map_.size())
+                    ss << " ";
             }
             std::string line_should_be = ss.str();
             
