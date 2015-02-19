@@ -49,13 +49,6 @@ namespace addon {
     };
     
     //============================ addition ========================================================
-    //~ if(a.type() == typeid(std::string))             \
-            //~ res = std::string(a) + (std::string*)void*(b);\
-        //~ else if(a.type() == typeid(double))             \
-            //~ res = double(a) OP (std::string*)void*(b);\
-        //~ else if(a.type() == typeid(int))                \
-            //~ res = int(a) OP (std::string*)void*(b);   \
-    
     #define OP_SUPPORT(NAME, OP)                        \
     template<typename T, bool, bool, bool>              \
     struct NAME##_helper {                              \
@@ -139,13 +132,13 @@ namespace addon {
             if(int(map_["warn_"]))
                 WARNING(text);
         }
-        void read(int argc, char * argv[]) {
+        void read(uint argc, char * argv[]) {
             //======================= get workin dir / program dir =================================
             std::string wd = abspath(argv);
             
             //------------------- search argv for "wd" -------------------
             std::string text = "";
-            bool found = false;
+            //~ bool found = false;
             
             for(uint i = 1; i < argc; ++i) {
                 std::string s = argv[i];
@@ -166,7 +159,7 @@ namespace addon {
                         }
                         text = text.erase(0, 3); //remove "wd="
                     }
-                    found = true;
+                    //~ found = true;
                     if(text[0] == '/')
                         wd = text;
                     else
@@ -193,7 +186,7 @@ namespace addon {
                 ifs.close();
             }
             //---------------- add normal argv last (higher prio) ----------------------------------
-            for(int i = 1; i < argc; ++i) {
+            for(uint i = 1; i < argc; ++i) {
                 ss << argv[i] << " ";
             }
             //----------------------- kill whitespace ----------------------------------------------
@@ -282,7 +275,9 @@ namespace addon {
                 }
             }
         }
-        
+        map_type const & map() const {
+            return map_;
+        }
         //=========================== query ========================================================
         bool has_param(std::string const & key) const {
             if(map_.find(key) != map_.end())

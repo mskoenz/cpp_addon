@@ -20,11 +20,14 @@ namespace addon {
         log_class(std::string const & name = parameter["wd"] + "/log.txt"): name_(name) {
         }
         proxy_struct & operator[](std::string const & name) {
+            if(find(order_.begin(), order_.end(), name) == order_.end()) {
+                order_.push_back(name);
+            }
             return map_[name];
         }
         void print() {
-            for(auto & a: map_) {
-                std::cout << a.second << " ";
+            for(auto & a: order_) {
+                std::cout << map_[a] << " ";
             }
             std::cout << std::endl;
         }
@@ -32,8 +35,8 @@ namespace addon {
             verify_header();
             //------------------------ write data --------------------------------------------------
             std::ofstream ofs(name_.c_str(), std::ios_base::app);
-            for(auto & a: map_) {
-                ofs << a.second << " ";
+            for(auto & a: order_) {
+                ofs << map_[a] << " ";
             }
             ofs << std::endl;
             //----------------------- write timestamp ----------------------------------------------
@@ -41,20 +44,35 @@ namespace addon {
                 << std::setfill(' ') << std::endl;
             ofs.close();
         }
+        template<typename T>
+        void set_param(T const & t) {
+            std::stringstream ss;
+            ss << "#param ";
+            for(auto const & a: t) {
+                ss << a.first << "=" << "\"" << a.second << "\" ";
+            }
+            ss << "\n";
+            param_line_ = ss.str();
+        }
     private:
+        void write_first(std::string const & line_should_be) const {
+            std::ofstream ofs(name_.c_str(), std::ios_base::trunc | std::ios_base::out);
+            ofs << line_should_be << std::endl;
+            ofs << param_line_;
+            
+            ofs.close();
+        }
         void verify_header() {
             std::stringstream ss;
-            for(auto & a: map_) {
-                ss << a.first << " ";
+            for(auto & a: order_) {
+                ss << a << " ";
             }
             std::string line_should_be = ss.str();
             
             if(first_open_) {
                 first_open_ = false;
                 if(parameter.has_flag("log_kill")) {
-                    std::ofstream ofs(name_.c_str(), std::ios_base::trunc | std::ios_base::out);
-                    ofs << line_should_be << std::endl;
-                    ofs.close();
+                    write_first(line_should_be);
                     return;
                 }
             }
@@ -65,8 +83,6 @@ namespace addon {
                 std::string line_read = "";
                 while((line_read == "" or line_read[0] == '#') and !ifs.eof()) {
                     std::getline(ifs, line_read);
-                    //~ if()
-                        //~ line_read = "";
                 }
                 ifs.close();
                 
@@ -82,12 +98,12 @@ namespace addon {
                 }
             }
             
-            std::ofstream ofs(name_.c_str(), std::ios_base::trunc | std::ios_base::out);
-            ofs << line_should_be << std::endl;
-            ofs.close();
+            write_first(line_should_be);
         }
         std::string name_;
         map_type map_;
+        std::vector<std::string> order_;
+        std::string param_line_ = "";
         bool first_open_ = true;
     };
 }// end namespace addon
