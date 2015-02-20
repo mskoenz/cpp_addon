@@ -36,7 +36,7 @@ namespace addon {
             //------------------------ write data --------------------------------------------------
             std::ofstream ofs(name_.c_str(), std::ios_base::app);
 
-            int i = 0;
+            uint i = 0;
             for(auto & a: order_) {
                 ofs << map_[a] << " ";
                 if(++i < order_.size())
@@ -69,7 +69,7 @@ namespace addon {
         void verify_header() {
             std::stringstream ss;
             
-            int i = 0;
+            uint i = 0;
             for(auto & a: order_) {
                 ss << a;
                 if(++i < order_.size())

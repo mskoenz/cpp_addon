@@ -123,13 +123,13 @@ namespace addon {
         using map_type = std::map<std::string, proxy_struct>;
     public:
         parameter_class() {
-            map_["warn_"] = 1;
+            param["warn_"] = 1;
         }
         proxy_struct & operator[](std::string const & name) {
-            return map_[name];
+            return param[name];
         }
         void warn(std::string const & text) {
-            if(int(map_["warn_"]))
+            if(int(param["warn_"]))
                 WARNING(text);
         }
         void read(uint argc, char * argv[]) {
@@ -255,7 +255,7 @@ namespace addon {
                         }
                         else
                             //----------------- setting the flag -----------------------------------
-                            flag_.push_back(key);
+                            flag.push_back(key);
                     }
                 }
                 else {
@@ -270,27 +270,27 @@ namespace addon {
                         }
                         else
                             //------------------ adding the arg ------------------------------------
-                            arg_.push_back(w);
+                            arg.push_back(w);
                     }
                 }
             }
         }
         map_type const & map() const {
-            return map_;
+            return param;
         }
         //=========================== query ========================================================
         bool has_param(std::string const & key) const {
-            if(map_.find(key) != map_.end())
+            if(param.find(key) != param.end())
                 return true;
             return false;
         }
-        bool has_flag(std::string const & flag) const {
-            if(find(flag_.begin(), flag_.end(), flag) != flag_.end())
+        bool has_flag(std::string const & _flag) const {
+            if(find(flag.begin(), flag.end(), _flag) != flag.end())
                 return true;
             return false;
         }
-        bool has_arg(std::string const & arg) const {
-            if(find(arg_.begin(), arg_.end(), arg) != arg_.end())
+        bool has_arg(std::string const & _arg) const {
+            if(find(arg.begin(), arg.end(), _arg) != arg.end())
                 return true;
             return false;
         }
@@ -303,26 +303,26 @@ namespace addon {
             os << GREENB_ << "Parameter Class contains:" << NONE_ << std::endl;
             //------------------- print int -------------------
             os << GREEN_ << "integer:" << NONE_ << std::endl;
-            for(auto v: map_) // has to be copy...
+            for(auto v: param) // has to be copy...
                 if(v.second.type() == typeid(int))
                     os << "    " << v.first << " = " << v.second << std::endl;
             //------------------- print double -------------------
             os << GREEN_ << "double:" << NONE_ << std::endl;
-            for(auto v: map_)
+            for(auto v: param)
                 if(v.second.type() == typeid(double))
                     os << "    " << v.first << " = " << v.second << std::endl;
             //------------------- print string -------------------
             os << GREEN_ << "string:" << NONE_ << std::endl;
-            for(auto v: map_)
+            for(auto v: param)
                 if(v.second.type() == typeid(std::string))
                     os << "    " << v.first << " = " << v.second << std::endl;
             os << GREEN_ << "Flags: " << NONE_;
-            for(auto const & f: flag_) {
+            for(auto const & f: flag) {
                 os << "-" << f << " ";
             }
             os << std::endl;
             os << GREEN_ << "Args: " << NONE_;
-            for(auto const & a: arg_) {
+            for(auto const & a: arg) {
                 os << a << " ";
             }
             os << std::endl;
@@ -346,15 +346,16 @@ namespace addon {
             }
             
             if(ipos == val.size())
-                map_[key] = ival;
+                param[key] = ival;
             else if(dpos == val.size())
-                map_[key] = dval;
+                param[key] = dval;
             else
-                map_[key] = val;
+                param[key] = val;
         }
-        map_type map_;
-        std::vector<std::string> arg_;
-        std::vector<std::string> flag_;
+    public:
+        map_type param;
+        std::vector<std::string> arg;
+        std::vector<std::string> flag;
     } parameter;
 
     std::ostream & operator<<(std::ostream & os, parameter_class const & arg) {

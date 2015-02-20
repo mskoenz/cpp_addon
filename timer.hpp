@@ -98,7 +98,7 @@ namespace addon {
     std::ostream & operator<<(std::ostream & os, timer_class const & arg) {
         arg.print(os);
         return os;
-    };
+    }
 }// end namespace addon
 
 #endif // ADDON_TIMER_HEADER
