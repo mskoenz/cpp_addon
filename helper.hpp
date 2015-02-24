@@ -37,7 +37,7 @@ namespace addon {
             return dir;
         else
             dir.erase(0, 1); // erase . in ./folder
-            return path + dir;
+            return cwd + dir;
     }
     
     std::string progress_bar(double const & p) {

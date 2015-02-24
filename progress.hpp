@@ -18,11 +18,12 @@ namespace addon {
         static void set_load(uint64_t const & in) {
             fname_ = std::string(parameter["wd"] + "/status.txt"); //strange that I have to use cast here bc static...
             load_ = in;
-            timer_.start();
             mod_ = 1;
             first_idx_ = -1;
-            last_print_ = timer_.elapsed_sec();
             
+            timer_.start();
+            done_ = false;
+            last_print_ = timer_.elapsed_sec();
             launch_time_ = clock::time_since_epoch();
         }
         static void write_state_file() {
@@ -71,6 +72,8 @@ namespace addon {
             mod_ = 1; //pass first if
             last_print_ -= 3600; //heuristics remove an hour, should be sure to pass second if
             timer_.stop();
+            done_ = true;
+            
             update(load_); //ifs in this fct
         }
         static inline double p() {
@@ -80,8 +83,10 @@ namespace addon {
             if(to_file)
                 write_state_file();
             if(to_term) {
-                std::cout << "Job done in " << sec_to_time(eta_) << "  " << progress_bar(p());
-                if(p() < 1) {
+                if(done_) {
+                    std::cout << "Job done in " << sec_to_time(timer_.elapsed_sec()) << "  " << progress_bar(p());
+                } else {
+                    std::cout << "Job done in " << sec_to_time(eta_) << "  " << progress_bar(p());
                     std::cout << RENTER_;
                 }
             }
@@ -103,6 +108,7 @@ namespace addon {
         static double eta_;
         static std::string fname_;
         static bool trigger_;
+        static bool done_;
     };
     
     bool progress::to_file = false;
@@ -118,5 +124,6 @@ namespace addon {
     double progress::eta_;
     std::string progress::fname_;
     bool progress::trigger_ = false;
+    bool progress::done_ = false;
 }//end namespace addon
 #endif // ADDON_PROGRESS_HEADER

@@ -138,7 +138,6 @@ namespace addon {
             
             //------------------- search argv for "wd" -------------------
             std::string text = "";
-            //~ bool found = false;
             
             for(uint i = 1; i < argc; ++i) {
                 std::string s = argv[i];
@@ -159,7 +158,7 @@ namespace addon {
                         }
                         text = text.erase(0, 3); //remove "wd="
                     }
-                    //~ found = true;
+
                     if(text[0] == '/')
                         wd = text;
                     else
