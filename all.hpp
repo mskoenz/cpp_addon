@@ -14,6 +14,7 @@
 #include "progress.hpp"
 #include "parameter.hpp"
 #include "accumulator.hpp"
+#include "print_helper.hpp"
 #include "performance.hpp"
 #include "micro_benchmark.hpp"
 

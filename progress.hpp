@@ -91,6 +91,9 @@ namespace addon {
                 }
             }
         }
+        static inline double elapsed_sec() {
+            return timer_.elapsed_sec();
+        }
         static bool to_file;
         static bool to_term;
     private:
