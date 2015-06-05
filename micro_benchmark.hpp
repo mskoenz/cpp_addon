@@ -53,6 +53,26 @@ namespace addon {
             std::get<0>(tel_.at(key)) = 0;
             stack_.pop_back();
         }
+        static void save(std::string const & name) {
+            std::set<std::string> parents;
+            
+            for(auto const & p : tel_) {
+                std::get<1>(p.second);
+                parents.insert(std::get<2>(p.second));
+            }
+            
+            std::ofstream os(name);
+            os << "parent name mean_cyc mean_cyc_err calls" << std::endl;
+            for(auto const & p : parents) {
+                for(auto const & t : tel_) {
+                    if(std::get<2>(t.second) == p) {
+                        auto acc = std::get<1>(tel_.at(t.first));
+                        os << p << " " << t.first << " " << acc.mean() << " " << acc.std() << " " << acc.count() << std::endl;
+                    }
+                }
+            }
+            os.close();
+        }
         static void results() {
             std::set<std::string> parents;
             
