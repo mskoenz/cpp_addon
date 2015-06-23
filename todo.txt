@@ -1,0 +1,4 @@
+TODO:
+allow same keys in different paths in START_MICRO and only measure childs (sA B endA sC B endC) -> B 200% of A
+
+DONE:
