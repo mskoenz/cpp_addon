@@ -134,7 +134,8 @@ namespace addon {
         }
         void read(uint argc, char * argv[]) {
             //======================= get workin dir / program dir =================================
-            std::string wd = abspath(argv);
+            //~ std::string wd = abspath(argv);
+            std::string wd = cwd();
             
             //------------------- search argv for "wd" -------------------
             std::string text = "";

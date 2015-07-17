@@ -24,20 +24,25 @@ namespace addon {
                          << ":" << std::setw(2) << (sec)%60;
         return ss.str();
     }
-
+    
+    std::string cwd() {
+        char * path = getcwd(NULL, 0);
+        std::string cwd = path;
+        return cwd;
+    }
+    
     std::string abspath(char* argv[]) {
         std::string dir(argv[0]);
         auto pos = dir.rfind("/");
         dir.erase(pos, dir.size() - pos); // erase progname in ./folder/progname
         
-        char * path = getcwd(NULL, 0);
-        std::string cwd = path;
+        std::string cwd_ = cwd();
         
         if(dir[0] == '/') // full specified path
             return dir;
         else
             dir.erase(0, 1); // erase . in ./folder
-            return cwd + dir;
+            return cwd_ + dir;
     }
     
     std::string progress_bar(double const & p) {
