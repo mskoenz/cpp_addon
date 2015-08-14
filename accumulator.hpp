@@ -51,7 +51,9 @@ namespace addon {
 
     template<typename T>
     std::ostream & operator<<(std::ostream & os, accumulator<T> const & d) {
+        std::streamsize p = os.precision();
         os << d.mean() << " +/- " << std::setprecision(3) << (100 * d.std() / d.mean()) << "% (n = " << d.count() << ")";
+        os.precision(p);
         return os;
     }
 }// end namespace addon
