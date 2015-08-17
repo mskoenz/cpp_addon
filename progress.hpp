@@ -19,6 +19,7 @@ namespace addon {
             fname_ = std::string(parameter["wd"] + "/status.txt"); //strange that I have to use cast here bc static...
             load_ = in;
             mod_ = 1;
+            idx_ = 0;
             first_idx_ = -1;
             
             timer_.start();
@@ -60,6 +61,10 @@ namespace addon {
                         mod_ <<= 1;
                 }
             }
+        }
+        static void update() {
+            ++idx_;
+            update(idx_);
         }
         template<typename F>
         static void trigger(F fct) {
