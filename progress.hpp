@@ -15,8 +15,8 @@
 namespace addon {
     class progress {
     public:
-        static void set_load(uint64_t const & in) {
-            fname_ = std::string(parameter["wd"] + "/status.txt"); //strange that I have to use cast here bc static...
+        static void set_load(uint64_t const & in, std::string const & file = std::string(parameter["wd"] + "/status.txt")) {
+            fname_ = file; //strange that I have to use cast here bc static...
             load_ = in;
             mod_ = 1;
             idx_ = 0;
