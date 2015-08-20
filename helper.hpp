@@ -78,13 +78,16 @@ void WARNING(std::string const & text) {
     std::cout << YELLOWB_ << "warning: " << YELLOW_ << text << NONE_ << std::endl;
 }
 
+#ifndef NDEBUG
 void ASSERT(bool const & cond, std::string const & text = "") {
-    #ifndef NDEBUG
-        if(!cond) {
-            std::cout << REDB_ << "assert failed: " << RED_ << text << NONE_ << std::endl;
-            assert(cond);
-        }
-    #endif // NDEBUG
+    if(!cond) {
+        std::cout << REDB_ << "assert failed: " << RED_ << text << NONE_ << std::endl;
+        assert(cond);
+    }
 }
+#else
+void ASSERT(bool const &, std::string const & = "") {
+}
+#endif // NDEBUG
 
 #endif // ADDON_HELPER_HEADER
